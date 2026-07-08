@@ -2,7 +2,7 @@
 from fastapi import FastAPI
 from app.database import engine, Base
 from app.routers import machines, logs, auth
-from middleware import log_process_time  # 導入你寫的計時中間件
+from app.middleware import log_process_time  # 導入你寫的計時中間件
 
 # 自動建立資料表
 # 以後建立與修改資料表一律交給 Alembic。
