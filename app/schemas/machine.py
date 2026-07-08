@@ -1,6 +1,6 @@
 # app/schemas/machine.py
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from app.schemas.log import LogResponse
 
 
@@ -20,5 +20,4 @@ class MachineResponse(MachineBase):
     # 巢狀結構：回傳機台時，順便包進該機台的所有日誌
     logs: List[LogResponse] = []
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

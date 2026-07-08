@@ -19,7 +19,9 @@ def create_machine(
     current_user: models.User = Depends(get_current_user),
 ):
     print(f"操作人是：{current_user.username}")
-    db_machine = models.Machine(name=machine.name, status=machine.status)
+    db_machine = models.Machine(
+        name=machine.name, status=machine.status, location=machine.location
+    )
     db.add(db_machine)
     db.commit()
     db.refresh(db_machine)
