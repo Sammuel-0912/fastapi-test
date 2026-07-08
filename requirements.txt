@@ -1,0 +1,16 @@
+# Web 框架與伺服器
+fastapi==0.122.0
+uvicorn==0.38.0
+
+# 資料庫 ORM
+SQLAlchemy==2.0.44
+
+# 資料驗證與設定
+pydantic==2.12.4
+pydantic-settings==2.13.0
+python-dotenv==1.2.1        # pydantic-settings 讀取 .env 所需
+
+# 認證：密碼雜湊與 JWT
+bcrypt==5.0.0
+PyJWT==2.11.0
+python-multipart==0.0.20   # OAuth2PasswordRequestForm 解析表單所需
