@@ -1,25 +1,29 @@
 # 負責處理資料庫的連線引擎（Engine）與 Session 工廠。
 
 # app/database.py
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import declarative_base
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./factory.db"
+SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./factory.db"
 
-engine = create_engine(
+engine = create_async_engine(
     # connect_args={"check_same_thread": False} 是 SQLite 特有的參數
     SQLALCHEMY_DATABASE_URL,
     connect_args={"check_same_thread": False},
 )
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# 🆕 建立非同步 Session 工廠，並指定 class_=AsyncSession
+SessionLocal = async_sessionmaker(
+    autocommit=False, autoflush=False, bind=engine, class_=AsyncSession
+)
 
 Base = declarative_base()
 
 
-# 依賴項：每次請求時獲取資料庫 Session，結束後自動關閉
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# 🆕 依賴項也要全面改為非同步：加上 async def，且回傳型態提示為 AsyncSession
+async def get_db():
+    async with SessionLocal() as db:
+        try:
+            yield db
+        finally:
+            # async with 會自動在結束時呼叫 db.close()，非常安全
+            pass

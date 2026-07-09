@@ -14,4 +14,6 @@ class Machine(Base):
     # 新增location欄位
     location = Column(String, default="Line A", server_default="Line A")
     # 一對多關聯：一個機台擁有多個日誌
-    logs = relationship("Log", back_populates="machine", cascade="all, delete-orphan")
+    logs = relationship(
+        "Log", back_populates="machine", cascade="all, delete-orphan", lazy="selectin"
+    )

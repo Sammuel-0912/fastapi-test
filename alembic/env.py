@@ -5,6 +5,10 @@ from sqlalchemy import pool
 
 from alembic import context
 
+# 🆕 在檔案頂端補上匯入
+from asyncio import run
+from sqlalchemy.ext.asyncio import AsyncEngine
+
 import os
 import sys
 
@@ -37,6 +41,7 @@ target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
+    """在『離線模式』下執行遷移（只生成 SQL 腳本，不連線資料庫）"""
     """Run migrations in 'offline' mode.
 
     This configures the context with just a URL
@@ -60,7 +65,14 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
+def do_run_migrations(connection):
+    context.configure(connection=connection, target_metadata=target_metadata)
+    with context.begin_transaction():
+        context.run_migrations()
+
+
 def run_migrations_online() -> None:
+    """在『連線模式』下執行遷移（直接更新資料庫）"""
     """Run migrations in 'online' mode.
 
     In this scenario we need to create an Engine
@@ -72,6 +84,17 @@ def run_migrations_online() -> None:
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
+    if isinstance(connectable, AsyncEngine):
+
+        async def run_async():
+            async with connectable.connect() as connection:
+                await connection.run_sync(do_run_migrations)
+
+        run(run_async())
+    else:
+        # 如果是一般同步引擎（保留相容性）
+        with connectable.connect() as connection:
+            do_run_migrations(connection)
 
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)
@@ -83,4 +106,5 @@ def run_migrations_online() -> None:
 if context.is_offline_mode():
     run_migrations_offline()
 else:
+    # 連線模式則呼叫我們升級好的非同步版本
     run_migrations_online()

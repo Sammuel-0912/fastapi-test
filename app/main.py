@@ -1,6 +1,5 @@
 # app/main.py
 from fastapi import FastAPI
-from app.database import engine, Base
 from app.routers import machines, logs, auth
 from app.middleware import log_process_time  # 導入你寫的計時中間件
 
