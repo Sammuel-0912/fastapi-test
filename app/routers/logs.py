@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app import models, schemas
+from app.exceptions import NotFoundError
 
 router = APIRouter(prefix="/logs", tags=["Logs (日誌管理)"])
 
@@ -17,12 +18,13 @@ async def create_log(
 ):
     # 先檢查機台是否存在
     # db.query(models.Machine).filter(models.Machine.id == machine_id).first()
-    stmt = select(models.Machine).where(models.Machine.id == machine_id)
-    result = await db.execute(stmt)
-    db_machine = result.scalar_one_or_none()
+    # stmt = select(models.Machine).where(models.Machine.id == machine_id)
+    # result = await db.execute(stmt)
+    # db_machine = result.scalar_one_or_none()
 
+    db_machine = await db.get(models.Machine, machine_id)
     if not db_machine:
-        raise HTTPException(status_code=404, detail="Machine not found, cannot log")
+        raise NotFoundError("Machine",machine_id)
 
     db_log = models.Log(message=log.message, machine_id=machine_id)
     db.add(db_log)

@@ -1,6 +1,6 @@
 # app/routers/machines.py
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 
 # 🆕 匯入 select 語法與非同步 Session 型態
 from sqlalchemy import select
@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 # from sqlalchemy.orm import Session
 from app.database import get_db
+from app.exceptions import NotFoundError  # 匯入自訂例外
 from app import models, schemas
 from app.routers.auth import get_current_user  # 🆕 匯入防護罩
 
@@ -51,43 +52,33 @@ async def read_machines(
 
 @router.get("/{machine_id}", response_model=schemas.MachineResponse)
 async def read_machine(machine_id: int, db: AsyncSession = Depends(get_db)):
-    # db_machine = (
-    #     db.query(models.Machine).filter(models.Machine.id == machine_id).first()
-    # )
-    # if not db_machine:
-    #     raise HTTPException(status_code=404, detail="Machine not found")
-    # return db_machine
+    
     # 🆕 查詢單一資料的非同步標準寫法
-    stmt = select(models.Machine).filter(models.Machine.id == machine_id)
-    result = await db.execute(stmt)
-    db_machine = result.scalar_one_or_none()  # 拿到單一物件，若沒有則為 None
+    # stmt = select(models.Machine).filter(models.Machine.id == machine_id)
+    # result = await db.execute(stmt)
+    # db_machine = result.scalar_one_or_none()  # 拿到單一物件，若沒有則為 None
 
+    # 🎯 使用 db.get 一行搞定主鍵查詢
+    db_machine = await db.get(models.Machine, machine_id)
     if not db_machine:
-        raise HTTPException(status_code=404, detail="Machine not found")
+        # raise HTTPException(status_code=404, detail="Machine not found")
+        # 直接 raise 自訂例外，不再需要 specify status_code=404
+        raise NotFoundError("Machine", machine_id)
     return db_machine
 
 
-@router.delete("/{machine_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{machine_id}",status_code=status.HTTP_200_OK)
 async def delete_machine(
     machine_id: int,
     db: AsyncSession = Depends(get_db),
     current_user: models.User = Depends(get_current_user),  # 🆕 加上防護罩
 ):
-    # db_machine = (
-    #     db.query(models.Machine).filter(models.Machine.id == machine_id).first()
-    # )
-    # if not db_machine:
-    #     raise HTTPException(status_code=404, detail="Machine not found")
-    # db.delete(db_machine)
-    # db.commit()
-    # return None
-    stmt = select(models.Machine).filter(models.Machine.id == machine_id)
-    result = await db.execute(stmt)
-    db_machine = result.scalar_one_or_none()
+    
+    db_machine = await db.get(models.Machine, machine_id)
     if not db_machine:
-        raise HTTPException(status_code=404, detail="Machine not found")
+        raise NotFoundError("Machine", machine_id)
 
     # 🆕 刪除物件並 commit（必須 await）
     await db.delete(db_machine)
     await db.commit()
-    return None
+    return {"message": "Machine deleted successfully"}

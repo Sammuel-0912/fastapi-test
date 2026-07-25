@@ -2,6 +2,7 @@
 from fastapi import FastAPI
 from app.routers import machines, logs, auth
 from app.middleware import log_process_time  # 導入你寫的計時中間件
+from app.exceptions import NotFoundError, not_found_error_handler
 
 # 自動建立資料表
 # 以後建立與修改資料表一律交給 Alembic。
@@ -15,6 +16,10 @@ app = FastAPI(
 
 # 1. 掛載中間件
 app.middleware("http")(log_process_time)
+
+
+# 註冊自訂例外與對應的處理器
+app.add_exception_handler(NotFoundError, not_found_error_handler)
 
 # 2. 註冊路由切片 (Include Routers)
 app.include_router(machines.router)
