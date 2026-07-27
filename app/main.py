@@ -1,6 +1,6 @@
 # app/main.py
-from fastapi import FastAPI 
-from fastapi.middleware.cors import CORSMiddleware # 🆕 匯入 CORSMiddleware
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware  # 🆕 匯入 CORSMiddleware
 from app.routers import machines, logs, auth
 from app.middleware import log_process_time  # 導入你寫的計時中間件
 from app.exceptions import NotFoundError, not_found_error_handler
@@ -15,22 +15,19 @@ app = FastAPI(
     description="這是一個採用企業級架構重構後的 FastAPI 專案",
     version="1.0.0",
 )
-# 1. 註冊 CORS 中間件 (須注意掛載順序)
-app.add_middleware(
-  CORSMiddleware,
-  allow_origins=settings.cors_origins, # 🆕 動態讀取環境變數設定
-  allow_origins=["http://localhost:5173"], # 允許前端網域
-  allow_credentials=True, # 允許攜帶憑證 (Cookie/Auth Header)
-  allow_methods=["*"], # 允許所有 HTTP 方法 (GET, POST, DELETE...)
-  allow_headers=["*"], # 允許所有 Header
-  expose_headers=["X-Process-Time"],  # 🆕 顯式暴露自訂 Header 給前端 JS
-)
-
-
 
 # 2. 掛載計時中間件
 app.middleware("http")(log_process_time)
 
+# 1. 註冊 CORS 中間件 (須注意掛載順序)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins,  # 🆕 動態讀取環境變數設定
+    allow_credentials=True,  # 允許攜帶憑證 (Cookie/Auth Header)
+    allow_methods=["*"],  # 允許所有 HTTP 方法 (GET, POST, DELETE...)
+    allow_headers=["*"],  # 允許所有 Header
+    expose_headers=["X-Process-Time"],  # 🆕 顯式暴露自訂 Header 給前端 JS
+)
 
 # 註冊自訂例外與對應的處理器
 app.add_exception_handler(NotFoundError, not_found_error_handler)
