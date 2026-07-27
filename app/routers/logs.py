@@ -1,11 +1,12 @@
 # app/routers/logs.py
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app import models, schemas
 from app.exceptions import NotFoundError
+
 
 router = APIRouter(prefix="/logs", tags=["Logs (日誌管理)"])
 
@@ -24,7 +25,7 @@ async def create_log(
 
     db_machine = await db.get(models.Machine, machine_id)
     if not db_machine:
-        raise NotFoundError("Machine",machine_id)
+        raise NotFoundError("Machine", machine_id)
 
     db_log = models.Log(message=log.message, machine_id=machine_id)
     db.add(db_log)
