@@ -33,8 +33,9 @@ app.add_middleware(
 app.add_exception_handler(NotFoundError, not_found_error_handler)
 
 # 2. 註冊路由切片 (Include Routers)
-app.include_router(machines.router)
 app.include_router(logs.router)
+app.include_router(logs.global_router)
+app.include_router(machines.router)
 app.include_router(auth.router)
 
 
