@@ -1,0 +1,11 @@
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+# B008 是 FastAPI 的 Depends() 語法，必須忽略
+ignore = ["B008"]
+
+# 設定 __init__.py 裡面的未存取匯入 (F401) 不報錯
+[tool.ruff.lint.per-file-ignores]
+"**/__init__.py" = ["F401"]

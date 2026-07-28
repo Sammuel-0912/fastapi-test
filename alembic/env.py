@@ -1,23 +1,20 @@
-from logging.config import fileConfig
-
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
-from alembic import context
+import os
+import sys
 
 # 🆕 在檔案頂端補上匯入
 from asyncio import run
+from logging.config import fileConfig
+
+from sqlalchemy import engine_from_config, pool
 from sqlalchemy.ext.asyncio import AsyncEngine
 
-import os
-import sys
+from alembic import context
 
 # 將專案根目錄加入 Python 搜尋路徑，確保能匯入 app
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # 匯入你的 Base 與所有模型
 from app.database import Base
-from app import models  # 確保模型被讀取到
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

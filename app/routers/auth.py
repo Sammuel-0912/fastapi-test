@@ -1,17 +1,15 @@
 # app/routers/auth.py
+import jwt
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
-from app.database import get_db
-from app import models, schemas, security
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 # 🆕 確保有匯入 select 與 AsyncSession
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-import jwt
+
+from app import models, schemas, security
 from app.config import settings
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from app.database import get_db
 
 router = APIRouter(prefix="/auth", tags=["Authentication (認證系統)"])
 

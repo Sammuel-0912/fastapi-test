@@ -1,8 +1,8 @@
 # 負責處理資料庫的連線引擎（Engine）與 Session 工廠。
 
 # app/database.py
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import declarative_base
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
 SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./factory.db"
 

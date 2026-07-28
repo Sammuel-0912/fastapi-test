@@ -1,4 +1,4 @@
 # app/schemas/__init__.py
-from .machine import MachineBase, MachineCreate, MachineResponse
 from .log import LogBase, LogCreate, LogResponse
-from .user import UserCreate, UserResponse, Token
+from .machine import MachineBase, MachineCreate, MachineResponse
+from .user import Token, UserCreate, UserResponse

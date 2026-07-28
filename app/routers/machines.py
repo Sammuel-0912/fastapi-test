@@ -1,15 +1,16 @@
 # app/routers/machines.py
-from typing import List
+
 from fastapi import APIRouter, Depends, status
 
 # 🆕 匯入 select 語法與非同步 Session 型態
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app import models, schemas
+
 # from sqlalchemy.orm import Session
 from app.database import get_db
 from app.exceptions import NotFoundError  # 匯入自訂例外
-from app import models, schemas
 from app.routers.auth import get_current_user  # 🆕 匯入防護罩
 
 # 宣告此 Router 的所有 API 都會自帶 /machines 前綴
@@ -17,7 +18,7 @@ router = APIRouter(prefix="/machines", tags=["Machines (機台管理)"])
 
 
 @router.post(
-    "/", response_model=schemas.MachineResponse, status_code=status.HTTP_201_CREATED
+    "", response_model=schemas.MachineResponse, status_code=status.HTTP_201_CREATED
 )
 async def create_machine(
     machine: schemas.MachineCreate,
@@ -34,7 +35,7 @@ async def create_machine(
     return db_machine
 
 
-@router.get("/", response_model=List[schemas.MachineResponse])
+@router.get("", response_model=list[schemas.MachineResponse])
 async def read_machines(
     skip: int = 0, limit: int = 10, db: AsyncSession = Depends(get_db)
 ):
@@ -52,7 +53,7 @@ async def read_machines(
 
 @router.get("/{machine_id}", response_model=schemas.MachineResponse)
 async def read_machine(machine_id: int, db: AsyncSession = Depends(get_db)):
-    
+
     # 🆕 查詢單一資料的非同步標準寫法
     # stmt = select(models.Machine).filter(models.Machine.id == machine_id)
     # result = await db.execute(stmt)
@@ -67,13 +68,13 @@ async def read_machine(machine_id: int, db: AsyncSession = Depends(get_db)):
     return db_machine
 
 
-@router.delete("/{machine_id}",status_code=status.HTTP_200_OK)
+@router.delete("/{machine_id}", status_code=status.HTTP_200_OK)
 async def delete_machine(
     machine_id: int,
     db: AsyncSession = Depends(get_db),
     current_user: models.User = Depends(get_current_user),  # 🆕 加上防護罩
 ):
-    
+
     db_machine = await db.get(models.Machine, machine_id)
     if not db_machine:
         raise NotFoundError("Machine", machine_id)

@@ -1,10 +1,11 @@
 # app/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware  # 🆕 匯入 CORSMiddleware
-from app.routers import machines, logs, auth
-from app.middleware import log_process_time  # 導入你寫的計時中間件
-from app.exceptions import NotFoundError, not_found_error_handler
+
 from app.config import settings
+from app.exceptions import NotFoundError, not_found_error_handler
+from app.middleware import log_process_time  # 導入你寫的計時中間件
+from app.routers import auth, logs, machines
 
 # 自動建立資料表
 # 以後建立與修改資料表一律交給 Alembic。

@@ -1,11 +1,12 @@
 import pytest_asyncio
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import (
-    create_async_engine,
-    async_sessionmaker,
     AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
 )
 from sqlalchemy.pool import StaticPool
+
 from app.database import Base, get_db
 from app.main import app
 
@@ -56,6 +57,8 @@ async def client():
 
     transport = ASGITransport(app=app)
     # 👈 允許自動跟隨轉址
-    async with AsyncClient(transport=transport, base_url="http://test",follow_redirects=True) as ac:
+    async with AsyncClient(
+        transport=transport, base_url="http://test", follow_redirects=True
+    ) as ac:
         yield ac
     app.dependency_overrides.clear()
