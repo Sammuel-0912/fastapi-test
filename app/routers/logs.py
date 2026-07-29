@@ -38,9 +38,7 @@ async def notify_maintenance(machine_id: int, log_id: int):
             )
     except Exception:
         # ❌ 捕捉所有未預期的錯誤，印出完整的 Error
-        logger.exception(
-            f"[背景通知失敗] 處理機台 ID {machine_id} 的日誌 #{log_id}"
-        )
+        logger.exception(f"[背景通知失敗] 處理機台 ID {machine_id} 的日誌 #{log_id}")
 
 
 @router.post(
