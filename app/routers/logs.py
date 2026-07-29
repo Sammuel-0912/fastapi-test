@@ -36,11 +36,10 @@ async def notify_maintenance(machine_id: int, log_id: int):
             logger.info(
                 f"[背景通知成功] 📢 機台『{machine_name}』(ID: {machine_id}) 新增了日誌 #{log_id}"
             )
-    except Exception as exc:
-        # ❌ 捕捉所有未預期的錯誤，印出完整的 Error 與詳細堆疊訊息 (exc_info=True)
-        logger.error(
-            f"[背景通知失敗] 處理機台 ID {machine_id} 的日誌 #{log_id} 時發生異常: {exc}",
-            exc_info=True,
+    except Exception:
+        # ❌ 捕捉所有未預期的錯誤，印出完整的 Error
+        logger.exception(
+            f"[背景通知失敗] 處理機台 ID {machine_id} 的日誌 #{log_id}"
         )
 
 
