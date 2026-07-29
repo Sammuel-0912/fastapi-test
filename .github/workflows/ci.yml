@@ -1,0 +1,49 @@
+name: FastAPI CI/CD Pipeline
+
+# 觸發條件：當有人 Push 到 master/main 分支，或是開 Pull Request 時觸發
+on:
+  push:
+    branches: ["master", "main"]
+  pull_request:
+    branches: ["master", "main"]
+
+
+jobs:
+  test:
+    name: Run Linting and Pytest
+    runs-on: ubuntu-lastest
+
+    steps:
+      # Step 1: 拉取你的 GitHub 專案程式碼
+      - name: Check out repository
+        uses: actions/checkout@v4
+      
+      # Step 2: 安裝 Python 3.10 環境
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: "pip" # 自動快取 pip 套件，加速後續跑 CI 的時間
+      
+      # Step 3: 安裝依賴套件與開發工具 (Ruff)
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff pytest pytest-asyncio httpx
+          pip install -r requirements.txt
+      
+      # Step 4: 建立測試所需的 .env 設定檔
+      - name: Create .env file for testing
+        run: |
+          cp .env.example .env
+          echo "SECRET_KEY=ci_test_secret_key_1234567890" >> .env
+      
+      # Step 5: 執行 Ruff 程式碼品質與格式檢查
+      - name: Run Ruff Linter
+        run: |
+          ruff check .
+          ruff format --check .
+      # Step 6: 執行 Pytest 自動化測試
+      - name: Run Pytest
+        run: |
+          pytest -v
