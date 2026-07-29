@@ -1,4 +1,5 @@
 import pytest
+import logging
 
 
 @pytest.mark.asyncio
@@ -38,3 +39,17 @@ async def test_create_and_read_nested_logs(client):
     global_resp = await client.get("/logs")
     assert global_resp.status_code == 200
     assert len(global_resp.json()) >= 1
+
+
+async def test_create_log_triggers_background_task(client, test_machine, caplog):
+    caplog.set_level(logging.INFO)
+
+    # 發送新增 Log 請求
+    response = await client.post(
+        f"/machines/{test_machine.id}/logs", json={"message": "測試背景任務"}
+    )
+    assert response.status_code == 201
+
+    # 斷言 Log 中確實印出了背景任務成功的訊息（證明背景任務沒爆，且真有抓到機台名稱）
+    assert "[背景通知成功]" in caplog.text
+    assert test_machine.name in caplog.text

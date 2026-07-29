@@ -2,6 +2,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware  # 🆕 匯入 CORSMiddleware
 
+import logging
 from app.config import settings
 from app.exceptions import NotFoundError, not_found_error_handler
 from app.middleware import log_process_time  # 導入你寫的計時中間件
@@ -15,6 +16,11 @@ app = FastAPI(
     title="工廠自動化管理系統 API",
     description="這是一個採用企業級架構重構後的 FastAPI 專案",
     version="1.0.0",
+)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
 # 2. 掛載計時中間件

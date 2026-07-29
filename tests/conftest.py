@@ -1,3 +1,4 @@
+import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import (
@@ -9,6 +10,7 @@ from sqlalchemy.pool import StaticPool
 
 from app.database import Base, get_db
 from app.main import app
+from app import models
 
 # 1. 建立一個專屬於測試的記憶體資料庫（速度極快，且執行完自動消失）
 SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -62,3 +64,22 @@ async def client():
     ) as ac:
         yield ac
     app.dependency_overrides.clear()
+
+
+@pytest.fixture(autouse=True)
+def override_background_session(monkeypatch):
+    """讓背景任務 notify_maintenance 使用測試記憶體資料庫，而非正式的 factory.db"""
+    from app.routers import logs
+
+    monkeypatch.setattr(logs, "SessionLocal", TestingSessionLocal)
+
+
+@pytest_asyncio.fixture
+async def test_machine():
+    """建立一台測試用機台並回傳，供背景任務等測試使用"""
+    async with TestingSessionLocal() as session:
+        machine = models.Machine(name="Test-Machine", status="operational")
+        session.add(machine)
+        await session.commit()
+        await session.refresh(machine)
+        return machine

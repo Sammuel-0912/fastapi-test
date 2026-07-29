@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import models, schemas
+from typing import Callable
 from app.database import (
     SessionLocal,
     get_db,
@@ -27,15 +28,23 @@ global_router = APIRouter(
 
 
 # 🆕 背景任務函式 (題目 2：獨立建立 Session 並查詢機台名稱)
-async def notify_maintenance(machine_id: int, log_id: int):
+async def notify_maintenance(
+    machine_id: int, log_id: int, session_factory: Callable | None = None
+):
     """在背景執行：自己開啟獨立 Session 查詢機台名稱並模擬發送通知"""
+    # 於執行期解析，讓測試可透過 monkeypatch 替換模組層級的 SessionLocal
+    factory = session_factory or SessionLocal
     try:
-        async with SessionLocal() as session:
+        async with factory() as session:
             machine = await session.get(models.Machine, machine_id)
-            machine_name = machine.name if machine else "未知機台"
-            logger.info(
-                f"[背景通知成功] 📢 機台『{machine_name}』(ID: {machine_id}) 新增了日誌 #{log_id}"
-            )
+            if machine:
+                logger.info(
+                    f"[背景通知成功] 📢 機台「{machine.name}」(ID: {machine_id}) 新增了日誌 #{log_id}"
+                )
+            else:
+                logger.warning(
+                    f"[背景通知警告] 找不到機台 ID {machine_id}，日誌 #{log_id} 通知未發送。"
+                )
     except Exception:
         # ❌ 捕捉所有未預期的錯誤，印出完整的 Error
         logger.exception(f"[背景通知失敗] 處理機台 ID {machine_id} 的日誌 #{log_id}")
@@ -67,7 +76,9 @@ async def create_machine_log(
     await db.refresh(db_log)
 
     # 題目 1 & 2：將背景任務排入佇列，僅傳入基本 ID 參數
-    background_tasks.add_task(notify_maintenance, machine_id, db_log.id)
+    background_tasks.add_task(
+        notify_maintenance, machine_id=machine_id, log_id=db_log.id
+    )
 
     return db_log
 
