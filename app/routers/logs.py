@@ -1,10 +1,13 @@
 # app/routers/logs.py
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, BackgroundTasks
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import models, schemas
-from app.database import get_db
+from app.database import (
+    SessionLocal,
+    get_db,
+)  # 🆕 匯入 SessionLocal 以便背景任務自行開 session
 from app.exceptions import NotFoundError
 
 # 1. 巢狀路由：專門處理特定機台的日誌 (/machines/{machine_id}/logs)
@@ -17,12 +20,22 @@ global_router = APIRouter(
 )
 
 
+# 🆕 背景任務函式 (題目 2：獨立建立 Session 並查詢機台名稱)
+async def notify_maintenance(machine_id: int, log_id: int):
+    """在背景執行：自己開啟獨立 Session 查詢機台名稱並模擬發送通知"""
+    async with SessionLocal() as session:
+        machine = await session.get(models.Machine, machine_id)
+        machine_name = machine.name if machine else "未知機台"
+        print(f"[背景通知] 機台 {machine_name} ID: {machine_id} 新增了日誌 #{log_id}")
+
+
 @router.post(
     "", response_model=schemas.LogResponse, status_code=status.HTTP_201_CREATED
 )
 async def create_machine_log(
     machine_id: int,  # FastAPI 自動識別為路徑參數 {machine_id}
     log_in: schemas.LogCreate,
+    background_tasks: BackgroundTasks,  # 👈 題目 1：擺在無預設值區段，避免 SyntaxError
     db: AsyncSession = Depends(get_db),
 ):
     """第 1 題：為指定機台建立日誌"""
@@ -40,6 +53,10 @@ async def create_machine_log(
     db.add(db_log)
     await db.commit()
     await db.refresh(db_log)
+
+    # 題目 1 & 2：將背景任務排入佇列，僅傳入基本 ID 參數
+    background_tasks.add_task(notify_maintenance, machine_id, db_log.id)
+
     return db_log
 
 
