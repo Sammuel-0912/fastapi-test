@@ -1,5 +1,7 @@
 # app/routers/logs.py
-from fastapi import APIRouter, Depends, status, BackgroundTasks
+import logging  # 🆕 匯入 logging 模組
+
+from fastapi import APIRouter, BackgroundTasks, Depends, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,6 +11,10 @@ from app.database import (
     get_db,
 )  # 🆕 匯入 SessionLocal 以便背景任務自行開 session
 from app.exceptions import NotFoundError
+
+# 🆕 建立專屬於此模組的 Logger
+logger = logging.getLogger(__name__)
+
 
 # 1. 巢狀路由：專門處理特定機台的日誌 (/machines/{machine_id}/logs)
 router = APIRouter(prefix="/machines/{machine_id}/logs", tags=["Logs (日誌管理)"])
@@ -23,10 +29,19 @@ global_router = APIRouter(
 # 🆕 背景任務函式 (題目 2：獨立建立 Session 並查詢機台名稱)
 async def notify_maintenance(machine_id: int, log_id: int):
     """在背景執行：自己開啟獨立 Session 查詢機台名稱並模擬發送通知"""
-    async with SessionLocal() as session:
-        machine = await session.get(models.Machine, machine_id)
-        machine_name = machine.name if machine else "未知機台"
-        print(f"[背景通知] 機台 {machine_name} ID: {machine_id} 新增了日誌 #{log_id}")
+    try:
+        async with SessionLocal() as session:
+            machine = await session.get(models.Machine, machine_id)
+            machine_name = machine.name if machine else "未知機台"
+            logger.info(
+                f"[背景通知成功] 📢 機台『{machine_name}』(ID: {machine_id}) 新增了日誌 #{log_id}"
+            )
+    except Exception as exc:
+        # ❌ 捕捉所有未預期的錯誤，印出完整的 Error 與詳細堆疊訊息 (exc_info=True)
+        logger.error(
+            f"[背景通知失敗] 處理機台 ID {machine_id} 的日誌 #{log_id} 時發生異常: {exc}",
+            exc_info=True,
+        )
 
 
 @router.post(
