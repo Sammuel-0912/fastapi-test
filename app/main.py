@@ -1,8 +1,9 @@
 # app/main.py
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware  # 🆕 匯入 CORSMiddleware
 
-import logging
 from app.config import settings
 from app.exceptions import NotFoundError, not_found_error_handler
 from app.middleware import log_process_time  # 導入你寫的計時中間件

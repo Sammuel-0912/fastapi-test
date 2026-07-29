@@ -8,9 +8,9 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.pool import StaticPool
 
+from app import models
 from app.database import Base, get_db
 from app.main import app
-from app import models
 
 # 1. 建立一個專屬於測試的記憶體資料庫（速度極快，且執行完自動消失）
 SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///:memory:"

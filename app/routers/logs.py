@@ -1,12 +1,12 @@
 # app/routers/logs.py
 import logging  # 🆕 匯入 logging 模組
+from collections.abc import Callable
 
 from fastapi import APIRouter, BackgroundTasks, Depends, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import models, schemas
-from typing import Callable
 from app.database import (
     SessionLocal,
     get_db,
