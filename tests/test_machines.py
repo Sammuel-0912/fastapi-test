@@ -42,3 +42,24 @@ async def test_full_auth_and_create_machine_flow(client):
     assert created_data["name"] == "CNC-001"
     assert created_data["location"] == "Line B"
     assert "id" in created_data
+
+
+async def test_delete_machine_success(client, auth_headers):
+    # 1. 先建立一台測試用機台
+    create_resp = await client.post(
+        "/machines",
+        json={"name": "Delete-Target-CNC", "model": "M-DELETE", "location": "Line D"},
+        headers=auth_headers,
+    )
+    assert create_resp.status_code == 201
+    machine_id = create_resp.json()["id"]
+
+    # 2. 發送 DELETE 請求刪除機台
+    delete_resp = await client.delete(f"/machines/{machine_id}", headers=auth_headers)
+    # 期望刪除成功（若為 HTTP 200 OK，驗證 status_code 與回傳訊息）
+    assert delete_resp.status_code == 200
+    assert delete_resp.json()["message"] == "Machine deleted successfully"
+
+    # 3. 驗證再次查詢該機台時應回傳 404 Not Found
+    get_resp = await client.get(f"/machines/{machine_id}")
+    assert get_resp.status_code == 404

@@ -18,7 +18,7 @@ from app.exceptions import NotFoundError  # 匯入自訂例外
 from app.models.users import User
 from app.routers.auth import (
     get_current_user,  # 🆕 匯入防護罩
-    require_role,
+    # require_role,
 )
 
 # 宣告此 Router 的所有 API 都會自帶 /machines 前綴
@@ -77,11 +77,11 @@ async def read_machine(machine_id: int, db: AsyncSession = Depends(get_db)):
     return db_machine
 
 
-@router.delete("/{machine_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{machine_id}", status_code=status.HTTP_200_OK)
 async def delete_machine(
     machine_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role("admin")),  # 🆕 加上防護罩
+    current_user: User = Depends(get_current_user),  # 🆕 加上防護罩
 ):
 
     db_machine = await db.get(models.Machine, machine_id)
