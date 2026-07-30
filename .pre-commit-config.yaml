@@ -1,0 +1,11 @@
+# 每次 commit 前自動用 ruff 檢查並修正程式碼
+# 安裝：pre-commit install
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.0
+    hooks:
+      # Linter（含 import 排序），自動修正
+      - id: ruff
+        args: [--fix]
+      # 格式化
+      - id: ruff-format

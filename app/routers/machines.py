@@ -1,6 +1,10 @@
 # app/routers/machines.py
 
+import logging
+
 from fastapi import APIRouter, Depends, status
+
+logger = logging.getLogger(__name__)
 
 # 🆕 匯入 select 語法與非同步 Session 型態
 from sqlalchemy import select
@@ -11,7 +15,11 @@ from app import models, schemas
 # from sqlalchemy.orm import Session
 from app.database import get_db
 from app.exceptions import NotFoundError  # 匯入自訂例外
-from app.routers.auth import get_current_user  # 🆕 匯入防護罩
+from app.models.users import User
+from app.routers.auth import (
+    get_current_user,  # 🆕 匯入防護罩
+    require_role,
+)
 
 # 宣告此 Router 的所有 API 都會自帶 /machines 前綴
 router = APIRouter(prefix="/machines", tags=["Machines (機台管理)"])
@@ -25,7 +33,8 @@ async def create_machine(
     db: AsyncSession = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    print(f"操作人是：{current_user.username}")
+    # print(f"操作人是：{current_user.username}")
+    logger.info(f"使用者 '{current_user.username}' 正在新增機台: {machine.name}")
     db_machine = models.Machine(
         name=machine.name, status=machine.status, location=machine.location
     )
@@ -68,11 +77,11 @@ async def read_machine(machine_id: int, db: AsyncSession = Depends(get_db)):
     return db_machine
 
 
-@router.delete("/{machine_id}", status_code=status.HTTP_200_OK)
+@router.delete("/{machine_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_machine(
     machine_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),  # 🆕 加上防護罩
+    current_user: User = Depends(require_role("admin")),  # 🆕 加上防護罩
 ):
 
     db_machine = await db.get(models.Machine, machine_id)

@@ -66,6 +66,23 @@ async def client():
     app.dependency_overrides.clear()
 
 
+# 🆕 2. 認證 Header Fixture：自動註冊、登入並回傳 Authorization Header
+@pytest_asyncio.fixture
+async def auth_headers(client):
+    auth_payload = {
+        "username": "testuser",
+        "password": "password123",  # 👈 滿足 min_length >= 8 規範
+    }
+    # 註冊測試帳號
+    await client.post("/auth/register", json=auth_payload)
+
+    # 登入取得 Token
+    login_resp = await client.post("/auth/login", data=auth_payload)
+    token = login_resp.json()["access_token"]
+
+    return {"Authorization": f"Bearer {token}"}
+
+
 @pytest.fixture(autouse=True)
 def override_background_session(monkeypatch):
     """讓背景任務 notify_maintenance 使用測試記憶體資料庫，而非正式的 factory.db"""
@@ -78,7 +95,9 @@ def override_background_session(monkeypatch):
 async def test_machine():
     """建立一台測試用機台並回傳，供背景任務等測試使用"""
     async with TestingSessionLocal() as session:
-        machine = models.Machine(name="Test-Machine", status="operational")
+        machine = models.Machine(
+            name="Test-Machine", status="operational", location="Line A"
+        )
         session.add(machine)
         await session.commit()
         await session.refresh(machine)

@@ -10,8 +10,28 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app import models, schemas, security
 from app.config import settings
 from app.database import get_db
+from app.models.users import User
 
 router = APIRouter(prefix="/auth", tags=["Authentication (認證系統)"])
+
+
+def require_role(*allowed_roles: str):
+    """
+    角色權限檢查依賴工廠 (RBAC)
+    用法: user = Depends(require_role("admin", "manager"))
+    """
+
+    async def role_checker(current_user: User = Depends(get_current_user)) -> User:
+        # 假設 User model 未來會有 role 欄位 (預設 "user")
+        user_role = getattr(current_user, "role", "user")
+        if user_role not in allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="權限不足，無法執行此操作",
+            )
+        return current_user
+
+    return role_checker
 
 
 @router.post(

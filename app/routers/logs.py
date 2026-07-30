@@ -12,13 +12,18 @@ from app.database import (
     get_db,
 )  # 🆕 匯入 SessionLocal 以便背景任務自行開 session
 from app.exceptions import NotFoundError
+from app.routers.auth import get_current_user  # 👈 引入驗證依賴
 
 # 🆕 建立專屬於此模組的 Logger
 logger = logging.getLogger(__name__)
 
 
 # 1. 巢狀路由：專門處理特定機台的日誌 (/machines/{machine_id}/logs)
-router = APIRouter(prefix="/machines/{machine_id}/logs", tags=["Logs (日誌管理)"])
+router = APIRouter(
+    prefix="/machines/{machine_id}/logs",
+    tags=["Logs (日誌管理)"],
+    dependencies=[Depends(get_current_user)],
+)  # 👈 整頁路由統一要求登入！
 
 # 2. 全域路由：處理跨機台日誌查詢 (/logs)
 global_router = APIRouter(
