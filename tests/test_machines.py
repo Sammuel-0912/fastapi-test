@@ -1,5 +1,5 @@
 async def test_read_machines_empty(client):
-    response = await client.get("/machines/")
+    response = await client.get("/machines")
     assert response.status_code == 200
     assert response.json() == []  # 預期剛開始應該是空陣列
 
@@ -7,10 +7,10 @@ async def test_read_machines_empty(client):
 async def test_create_machine_without_token(client):
     """測試在『沒有攜帶 Token』的情況下新增機台，是否會被正確攔截 (401 或 412)"""
     payload = {"name": "CNC-001", "status": "operational", "location": "Line A"}
-    response = await client.post("/machines/", json=payload)
+    response = await client.post("/machines", json=payload)
 
-    # 因為沒有token, 應該要被安全機制拒絕
-    assert response.status_code in [401, 412]
+    # 修改後 (明確要求必須是 401 Unauthorized)
+    assert response.status_code == 401
 
 
 async def test_full_auth_and_create_machine_flow(client):
@@ -33,7 +33,7 @@ async def test_full_auth_and_create_machine_flow(client):
     headers = {"Authorization": f"Bearer {token}"}  # 模擬前端 Headers 帶入 Token
 
     create_response = await client.post(
-        "/machines/", json=machine_payload, headers=headers
+        "/machines", json=machine_payload, headers=headers
     )
 
     # 4.驗證結果
@@ -97,3 +97,11 @@ async def test_delete_machine_as_normal_user_forbidden(client):
     del_resp = await client.delete("/machines/1", headers=user_headers)
     assert del_resp.status_code == 403
     assert del_resp.json()["detail"] == "權限不足，無法執行此操作"
+
+
+async def test_delete_machine_without_token_unauthorized(client):
+    """測試在『未攜帶 Token』的情況下刪除機台，應被阻擋並回傳 401"""
+    response = await client.delete("/machines/1")
+    assert response.status_code == 401
+    # 完全未帶 token 時，是 OAuth2PasswordBearer 先擋下，回傳 FastAPI 預設訊息
+    assert response.json()["detail"] == "Not authenticated"

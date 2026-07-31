@@ -21,7 +21,7 @@ async def test_create_and_read_nested_logs(client, auth_headers):
 
     # 1. 先建立一台機台
     m_resp = await client.post(
-        "/machines/", json={"name": "Test-Machine", "model": "M1"}, headers=auth_headers
+        "/machines", json={"name": "Test-Machine", "model": "M1"}, headers=auth_headers
     )
     assert m_resp.status_code == 201
     machine_id = m_resp.json()["id"]

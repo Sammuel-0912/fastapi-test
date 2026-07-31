@@ -60,7 +60,7 @@ async def client():
     transport = ASGITransport(app=app)
     # 👈 允許自動跟隨轉址
     async with AsyncClient(
-        transport=transport, base_url="http://test", follow_redirects=True
+        transport=transport, base_url="http://test", follow_redirects=False
     ) as ac:
         yield ac
     app.dependency_overrides.clear()
