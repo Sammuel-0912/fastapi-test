@@ -48,7 +48,7 @@ async def test_delete_machine_success(client, auth_headers):
     # 1. 先建立一台測試用機台
     create_resp = await client.post(
         "/machines",
-        json={"name": "Delete-Target-CNC", "model": "M-DELETE", "location": "Line D"},
+        json={"name": "Delete-Target-CNC", "location": "Line D"},
         headers=auth_headers,
     )
     assert create_resp.status_code == 201
@@ -105,3 +105,18 @@ async def test_delete_machine_without_token_unauthorized(client):
     assert response.status_code == 401
     # 完全未帶 token 時，是 OAuth2PasswordBearer 先擋下，回傳 FastAPI 預設訊息
     assert response.json()["detail"] == "Not authenticated"
+
+
+async def test_register_role_injection_attack_fails(client):
+    """測試攻擊者嘗試在註冊時注入 role="admin"，系統應忽視或阻止，建立出來的依然是普通 user"""
+    attack_payload = {
+        "username": "hacker",
+        "password": "password123",
+        "role": "admin",  # 💥 試圖提權攻擊
+    }
+    reg_resp = await client.post("/auth/register", json=attack_payload)
+    assert reg_resp.status_code == 201
+
+    # 驗證返回的使用者資訊，role 依然是被強制的 "user"
+    user_data = reg_resp.json()
+    assert user_data["role"] == "user"

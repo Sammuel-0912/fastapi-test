@@ -10,4 +10,4 @@ class User(Base):
     username = Column(String, unique=True, index=True, nullable=False)
     hash_password = Column(String, nullable=False)
     # 🆕 新增 role 欄位，預設為 "admin"
-    role = Column(String, default="admin", nullable=False)
+    role = Column(String, default="user", nullable=False)

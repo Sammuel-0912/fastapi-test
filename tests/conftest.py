@@ -69,17 +69,24 @@ async def client():
 # 🆕 2. 認證 Header Fixture：自動註冊、登入並回傳 Authorization Header
 @pytest_asyncio.fixture
 async def auth_headers(client):
-    auth_payload = {
-        "username": "testuser",
-        "password": "password123",  # 👈 滿足 min_length >= 8 規範
-    }
-    # 註冊測試帳號
-    await client.post("/auth/register", json=auth_payload)
+    """專門為管理員測試提供的 auth header (role="admin")"""
+    async with TestingSessionLocal() as session:
+        from app.security import hash_password
+
+        admin_user = models.User(
+            username="admin_test",
+            hash_password=hash_password("password123"),
+            role="admin",  # 👈 由測試環境預設造出管理員
+        )
+        session.add(admin_user)
+        await session.commit()
 
     # 登入取得 Token
-    login_resp = await client.post("/auth/login", data=auth_payload)
-    token = login_resp.json()["access_token"]
+    login_resp = await client.post(
+        "/auth/login", data={"username": "admin_test", "password": "password123"}
+    )
 
+    token = login_resp.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}
 
 

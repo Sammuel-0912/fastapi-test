@@ -56,7 +56,6 @@ async def register(user: schemas.UserCreate, db: AsyncSession = Depends(get_db))
     new_user = models.User(
         username=user.username,
         hash_password=security.hash_password(user.password),
-        role=user.role,
     )
     db.add(new_user)
     await db.commit()
