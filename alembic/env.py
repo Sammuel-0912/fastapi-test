@@ -14,6 +14,7 @@ from alembic import context
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # 匯入你的 Base 與所有模型
+from app import models  # noqa: F401  👈 顯式匯入所有 models，確保載入到 Base.metadata
 from app.database import Base
 
 # this is the Alembic Config object, which provides

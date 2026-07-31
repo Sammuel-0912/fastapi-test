@@ -83,11 +83,10 @@ async def test_delete_machine_as_admin_success(client, auth_headers):
 
 async def test_delete_machine_as_normal_user_forbidden(client):
     """測試一般 user 角色刪除機台被 403 阻擋"""
-    # 1. 註冊一個普通 user 帳號 (role="user")
+    # 1. 註冊一個普通 user 帳號 (清理掉多餘的 "role": "user")
     user_payload = {
         "username": "normal_user",
         "password": "password123",
-        "role": "user",
     }
     await client.post("/auth/register", json=user_payload)
     login_resp = await client.post("/auth/login", data=user_payload)

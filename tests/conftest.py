@@ -58,7 +58,7 @@ async def client():
     app.dependency_overrides[get_db] = _get_test_db
 
     transport = ASGITransport(app=app)
-    # 👈 允許自動跟隨轉址
+    # 👈 不允許自動跟隨轉址
     async with AsyncClient(
         transport=transport, base_url="http://test", follow_redirects=False
     ) as ac:

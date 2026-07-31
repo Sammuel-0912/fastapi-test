@@ -9,5 +9,5 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True, nullable=False)
     hash_password = Column(String, nullable=False)
-    # 🆕 新增 role 欄位，預設為 "admin"
-    role = Column(String, default="user", nullable=False)
+    # 🔒 新增 role 欄位，預設為 "user"
+    role = Column(String, default="user", server_default="user", nullable=False)
