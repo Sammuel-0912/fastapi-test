@@ -21,10 +21,11 @@ def require_role(*allowed_roles: str):
     用法: user = Depends(require_role("admin", "manager"))
     """
 
-    async def role_checker(current_user: User = Depends(get_current_user)) -> User:
-        # 假設 User model 未來會有 role 欄位 (預設 "user")
-        user_role = getattr(current_user, "role", "user")
-        if user_role not in allowed_roles:
+    async def role_checker(
+        current_user: User = Depends(get_current_user),
+    ) -> models.User:
+        # 🆕 直接讀取 current_user.role
+        if current_user.role not in allowed_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="權限不足，無法執行此操作",
@@ -53,7 +54,9 @@ async def register(user: schemas.UserCreate, db: AsyncSession = Depends(get_db))
 
     # 密碼加密保存
     new_user = models.User(
-        username=user.username, hash_password=security.hash_password(user.password)
+        username=user.username,
+        hash_password=security.hash_password(user.password),
+        role=user.role,
     )
     db.add(new_user)
     await db.commit()

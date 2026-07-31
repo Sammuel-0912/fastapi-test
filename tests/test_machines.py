@@ -63,3 +63,37 @@ async def test_delete_machine_success(client, auth_headers):
     # 3. 驗證再次查詢該機台時應回傳 404 Not Found
     get_resp = await client.get(f"/machines/{machine_id}")
     assert get_resp.status_code == 404
+
+
+async def test_delete_machine_as_admin_success(client, auth_headers):
+    """測試 admin 角色成功刪除機台"""
+    # 1. 新增機台
+    m_resp = await client.post(
+        "/machines",
+        json={"name": "Machine-To-Delete", "location": "Line A"},
+        headers=auth_headers,
+    )
+    machine_id = m_resp.json()["id"]
+
+    # 2. 刪除機台 (auth_headers 預設為 admin)
+    delete_resp = await client.delete(f"/machines/{machine_id}", headers=auth_headers)
+    assert delete_resp.status_code == 200
+    assert delete_resp.json()["message"] == "Machine deleted successfully"
+
+
+async def test_delete_machine_as_normal_user_forbidden(client):
+    """測試一般 user 角色刪除機台被 403 阻擋"""
+    # 1. 註冊一個普通 user 帳號 (role="user")
+    user_payload = {
+        "username": "normal_user",
+        "password": "password123",
+        "role": "user",
+    }
+    await client.post("/auth/register", json=user_payload)
+    login_resp = await client.post("/auth/login", data=user_payload)
+    user_headers = {"Authorization": f"Bearer {login_resp.json()['access_token']}"}
+
+    # 2. 嘗試刪除機台 (假設刪除 ID 1)
+    del_resp = await client.delete("/machines/1", headers=user_headers)
+    assert del_resp.status_code == 403
+    assert del_resp.json()["detail"] == "權限不足，無法執行此操作"
