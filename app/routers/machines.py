@@ -44,7 +44,7 @@ async def create_machine(
     return db_machine
 
 
-@router.get("", response_model=list[schemas.MachineResponse])
+@router.get("", response_model=list[schemas.MachineListResponse])
 async def read_machines(
     skip: int = 0, limit: int = 10, db: AsyncSession = Depends(get_db)
 ):
@@ -60,6 +60,7 @@ async def read_machines(
     return result.scalars().all()
 
 
+# 單筆詳情 API 維持回傳完整的 schemas.MachineResponse (包含 logs)
 @router.get("/{machine_id}", response_model=schemas.MachineResponse)
 async def read_machine(machine_id: int, db: AsyncSession = Depends(get_db)):
 
