@@ -4,5 +4,7 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
+    env_file:
+      - .env # 👈 執行期注入：這會讓 .env 變數以環境變數形式傳給容器
     ports:
       - 8000:8000
