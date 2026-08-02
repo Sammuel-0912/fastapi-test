@@ -11,11 +11,11 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 COPY ./app /code/app
 COPY ./alembic /code/alembic
 COPY ./alembic.ini /code/alembic.ini
-COPY ./.env /code/.env
 
-# 🆕 複製開機腳本，並賦予執行權限
+
+# 🆕 複製開機腳本，去除 CRLF 換行並賦予執行權限
 COPY ./start.sh /code/start.sh
-RUN chmod +x /code/start.sh
+RUN sed -i 's/\r$//' /code/start.sh && chmod +x /code/start.sh
 
 EXPOSE 8000
 
