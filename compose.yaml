@@ -8,3 +8,10 @@ services:
       - .env # 👈 執行期注入：這會讓 .env 變數以環境變數形式傳給容器
     ports:
       - 8000:8000
+
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/docs')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
