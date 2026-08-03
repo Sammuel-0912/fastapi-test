@@ -35,7 +35,6 @@ async def seed_admin():
             return
 
         # 2. 不存在則建立預設 admin
-        # 💡 正式環境密碼建議從環境變數讀取，預設給 password123
         default_admin = models.User(
             username=admin_username,
             hash_password=security.hash_password(admin_password),
@@ -43,7 +42,7 @@ async def seed_admin():
         )
         session.add(default_admin)
         await session.commit()
-        logger.info("✅ 成功建立預設 Admin 管理員帳號 (username: {admin_username})！")
+        logger.info(f"✅ 成功建立預設 Admin 管理員帳號 (username: {admin_username})！")
 
 
 if __name__ == "__main__":
