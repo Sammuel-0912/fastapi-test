@@ -18,7 +18,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
       
-      # Step 2: 安裝 Python 3.10 環境
+      # Step 2: 安裝 Python 3.13 環境
       - name: Set up Python 3.13
         uses: actions/setup-python@v5
         with:
