@@ -1,9 +1,10 @@
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     # 定義變數名稱與型態（名稱必須與 .env 檔案中的 Key 完全一致，大小寫不限
-    secret_key: str
+    secret_key: str = Field(..., min_length=1)
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
 
