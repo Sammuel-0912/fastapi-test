@@ -11,6 +11,7 @@ from app import models, schemas, security
 from app.config import settings
 from app.database import get_db
 from app.models.users import User
+from app.schemas import user as user_schemas
 
 router = APIRouter(prefix="/auth", tags=["Authentication (認證系統)"])
 
@@ -125,3 +126,9 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
     return user
+
+
+@router.get("/me", response_model=user_schemas.UserResponse)
+async def read_me(current_user: User = Depends(get_current_user)):
+    """取得當前已登入使用者的個人資訊 (包含 role)"""
+    return current_user
