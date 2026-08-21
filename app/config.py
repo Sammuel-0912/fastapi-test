@@ -9,7 +9,12 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
 
     # 🆕 新增 CORS 白名單設定，支援 List[str] 或由 JSON 字串解析
-    cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
+    cors_origins: list[str] = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:4173",
+        "http://127.0.0.1:4173",
+    ]
 
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
