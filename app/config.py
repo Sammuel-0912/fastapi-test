@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
 
+    database_url: str = "sqlite+aiosqlite:///./data/factory.db"
+
     # 🆕 新增 CORS 白名單設定，支援 List[str] 或由 JSON 字串解析
     cors_origins: list[str] = [
         "http://localhost:5173",

@@ -4,12 +4,13 @@
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import declarative_base
 
-SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./factory.db"
+from app.config import settings
 
 engine = create_async_engine(
+    settings.database_url,
     # connect_args={"check_same_thread": False} 是 SQLite 特有的參數
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False},
+    echo=False,
+    # connect_args={"check_same_thread": False},
 )
 # 🆕 建立非同步 Session 工廠，並指定 class_=AsyncSession
 SessionLocal = async_sessionmaker(

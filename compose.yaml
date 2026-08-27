@@ -9,9 +9,15 @@ services:
     ports:
       - 8000:8000
 
+    volumes:
+      - factory-data:/code/data
+
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/')"]
       interval: 10s
       timeout: 5s
       retries: 3
       start_period: 5s
+
+volumes:
+  factory-data:
