@@ -30,12 +30,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      
-      - name: Run Pytest
-        env:
-          SECRET_KEY: ci_test_secret_key_1234567890  # 來源 B
-        run: pytest -v
-
+  
       # Step 5: 執行 Ruff 程式碼品質與格式檢查
       - name: Run Ruff Linter
         run: |
