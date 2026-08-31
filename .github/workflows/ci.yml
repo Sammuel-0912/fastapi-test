@@ -3,9 +3,9 @@ name: FastAPI CI/CD Pipeline
 # 觸發條件：當有人 Push 到 master/main 分支，或是開 Pull Request 時觸發
 on:
   push:
-    branches: ["master", "main"]
+    branches: ["main"]
   pull_request:
-    branches: ["master", "main"]
+    branches: ["main"]
 
 
 jobs:
@@ -31,13 +31,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
-      # Step 4: 建立測試所需的 .env 設定檔 # Step 4: 使用 sed 替換 SECRET_KEY，避免檔案內出現重複 Key
-      - name: Create .env file for testing
-        run: |
-          cp .env.example .env
-          
-          sed -i 's/SECRET_KEY=/SECRET_KEY=from_env_file_wrong_key/' .env # 來源 A
-      
       - name: Run Pytest
         env:
           SECRET_KEY: ci_test_secret_key_1234567890  # 來源 B
@@ -52,6 +45,5 @@ jobs:
       - name: Run Pytest
         env:
           SECRET_KEY: ci_test_secret_key_1234567890
-          
         run: |
           pytest -v
