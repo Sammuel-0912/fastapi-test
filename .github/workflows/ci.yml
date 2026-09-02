@@ -22,13 +22,20 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
       
-      # Step 2: 安裝 Python 3.13 環境
-      - name: Set up Python 3.13
+      # # Step 2: 安裝 Python 3.13 環境
+      # - name: Set up Python 3.13
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: "3.13"
+      #     cache: "pip" # 自動快取 pip 套件，加速後續跑 CI 的時間
+      
+      - name: ⚙️ 設定 Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
-          cache: "pip" # 自動快取 pip 套件，加速後續跑 CI 的時間
-      
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+
       # Step 3: 安裝依賴套件與開發工具 (Ruff)
       - name: Install dependencies
         run: |
