@@ -12,6 +12,10 @@ jobs:
   test:
     name: Run Linting and Pytest
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false # 🟢 關鍵：任一版本失敗時，其他版本仍會繼續跑完，便於觀察整體相容性
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
 
     steps:
       # Step 1: 拉取你的 GitHub 專案程式碼
