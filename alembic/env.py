@@ -1,12 +1,10 @@
+import asyncio
 import os
 import sys
-
-# 🆕 在檔案頂端補上匯入
-from asyncio import run
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config, pool
-from sqlalchemy.ext.asyncio import AsyncEngine
+from sqlalchemy import pool
+from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 
@@ -45,17 +43,6 @@ target_metadata = Base.metadata
 
 def run_migrations_offline() -> None:
     """在『離線模式』下執行遷移（只生成 SQL 腳本，不連線資料庫）"""
-    """Run migrations in 'offline' mode.
-
-    This configures the context with just a URL
-    and not an Engine, though an Engine is acceptable
-    here as well.  By skipping the Engine creation
-    we don't even need a DBAPI to be available.
-
-    Calls to context.execute() here emit the given string to the
-    script output.
-
-    """
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
@@ -74,40 +61,23 @@ def do_run_migrations(connection):
         context.run_migrations()
 
 
-def run_migrations_online() -> None:
-    """在『連線模式』下執行遷移（直接更新資料庫）"""
-    """Run migrations in 'online' mode.
-
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
-
-    """
-    connectable = engine_from_config(
+async def run_async_migrations() -> None:
+    connectable = async_engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
-    if isinstance(connectable, AsyncEngine):
+    async with connectable.connect() as connection:
+        await connection.run_sync(do_run_migrations)
+    await connectable.dispose()
 
-        async def run_async():
-            async with connectable.connect() as connection:
-                await connection.run_sync(do_run_migrations)
 
-        run(run_async())
-    else:
-        # 如果是一般同步引擎（保留相容性）
-        with connectable.connect() as connection:
-            do_run_migrations(connection)
-
-    with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
-
-        with context.begin_transaction():
-            context.run_migrations()
+def run_migrations_online() -> None:
+    """在『連線模式』下執行遷移（直接更新資料庫）"""
+    asyncio.run(run_async_migrations())
 
 
 if context.is_offline_mode():
     run_migrations_offline()
 else:
-    # 連線模式則呼叫我們升級好的非同步版本
     run_migrations_online()
