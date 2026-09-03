@@ -16,6 +16,23 @@ jobs:
       fail-fast: false # 🟢 關鍵：任一版本失敗時，其他版本仍會繼續跑完，便於觀察整體相容性
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
+    
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        
+        ports:
+          - 5432:5432
+        
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
 
     steps:
       # Step 1: 拉取你的 GitHub 專案程式碼
@@ -47,7 +64,15 @@ jobs:
         run: |
           ruff check .
           ruff format --check .
-      # Step 6: 執行 Pytest 自動化測試
+      
+      # 🟢 跑 Alembic 遷移，真實打進剛剛開起來的 Postgres 容器
+      - name: 🗄️ Run migrations
+        env:
+          DATABASE_URL: postgresql+asyncpg://postgres:ci@localhost:5432/ci
+          SECRET_KEY: ci_test_secret_key_1234567890
+        run: alembic upgrade head
+
+      # 執行 Pytest 自動化測試
       - name: Run Pytest
         env:
           SECRET_KEY: ci_test_secret_key_1234567890
