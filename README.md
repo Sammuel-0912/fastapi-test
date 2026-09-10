@@ -1,3 +1,4 @@
+![FastAPI CI/CD Pipeline](https://github.com/Sammuel-0912/fastapi-test/actions/workflows/ci.yml/badge.svg?branch=main)
 # 工廠自動化管理系統 API
 
 採用企業級架構打造的 FastAPI 專案，提供機台（Machine）、日誌（Log）與使用者認證（Auth）管理功能。資料庫存取全面採用 **SQLAlchemy 2.0 非同步（async/await）** 寫法。
