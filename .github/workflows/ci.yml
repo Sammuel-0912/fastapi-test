@@ -69,12 +69,12 @@ jobs:
       - name: 🗄️ Run migrations
         env:
           DATABASE_URL: postgresql+asyncpg://postgres:ci@localhost:5432/ci
-          SECRET_KEY: ci_test_secret_key_1234567890
+          SECRET_KEY: ${{ secrets.CI_SECRET_KEY}}
         run: alembic upgrade head
 
       # 執行 Pytest 自動化測試
       - name: Run Pytest
         env:
-          SECRET_KEY: ci_test_secret_key_1234567890
+          SECRET_KEY: ${{ secrets.CI_SECRET_KEY}}
         run: |
           pytest -v
