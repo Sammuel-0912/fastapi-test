@@ -2,7 +2,7 @@
 import logging  # 🆕 匯入 logging 模組
 from collections.abc import Callable
 
-from fastapi import APIRouter, BackgroundTasks, Depends, status
+from fastapi import APIRouter, BackgroundTasks, Depends, Query, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -107,8 +107,8 @@ async def read_machine_logs(
 # === 全域路由端點 ===
 @global_router.get("", response_model=list[schemas.LogResponse])
 async def read_all_logs(
-    skip: int = 0,
-    limit: int = 100,
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=20, ge=1, le=500),
     db: AsyncSession = Depends(get_db),
 ):
     """第 3 題：全系統日誌查詢（跨機台）"""
