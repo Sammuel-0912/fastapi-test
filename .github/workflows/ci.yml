@@ -78,8 +78,3 @@ jobs:
           SECRET_KEY: ${{ secrets.CI_SECRET_KEY}}
         run: |
           pytest -v
-      
-      - name: 🧪 遮罩對照實驗
-        run: |
-          echo "直接印出 Secret: ${{ secrets.CI_SECRET_KEY }}"
-          echo -n "${{ secrets.CI_SECRET_KEY }}" | base64
