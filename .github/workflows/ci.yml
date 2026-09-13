@@ -83,9 +83,9 @@ jobs:
   build-image:
     needs: test
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+    # permissions:
+    #   contents: read
+    #   packages: write
     steps:
       - name: 📥 Checkout 程式碼
         uses: actions/checkout@v4
