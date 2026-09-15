@@ -90,6 +90,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      actions: write
     steps:
       - name: 📥 Checkout 程式碼
         uses: actions/checkout@v4
