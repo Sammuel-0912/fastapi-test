@@ -1,4 +1,4 @@
-# 這是測試
+# 這是測
 name: FastAPI CI/CD Pipeline
 
 # 觸發條件：當有人 Push 到 master/main 分支，或是開 Pull Request 時觸發
