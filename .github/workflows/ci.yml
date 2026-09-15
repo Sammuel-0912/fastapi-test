@@ -1,3 +1,4 @@
+# 這是測試
 name: FastAPI CI/CD Pipeline
 
 # 觸發條件：當有人 Push 到 master/main 分支，或是開 Pull Request 時觸發
@@ -7,6 +8,9 @@ on:
   pull_request:
     branches: ["main"]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
